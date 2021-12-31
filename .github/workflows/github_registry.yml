@@ -2,7 +2,7 @@ name: CI to GHCR
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
 
@@ -31,27 +31,20 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-          
-          
-      - name: Build and push
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.ghcr_TOKEN }}
+      -
+        name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./ 
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags:  ${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:latest
+          tags: ghcr.io/usha-mandya/simplewhale:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-      - name: Image digest
+      -
+        name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
